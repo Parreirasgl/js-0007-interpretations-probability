@@ -45,7 +45,6 @@
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
       border: 1px solid var(--border);
       padding: 36px 32px;
-      transition: all 0.3s ease;
     }
 
     .page {
@@ -68,13 +67,6 @@
       margin-bottom: 24px;
       text-align: center;
       line-height: 1.3;
-    }
-
-    h2 {
-      font-size: 1.35rem;
-      color: #1e293b;
-      margin-top: 24px;
-      margin-bottom: 12px;
     }
 
     p {
@@ -109,10 +101,12 @@
       color: white;
       border: none;
       border-radius: 8px;
-      padding: 12px 24px;
+      padding: 10px 22px;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
+      height: 44px;
+      white-space: nowrap;
       transition: background 0.2s, transform 0.1s;
     }
 
@@ -149,22 +143,22 @@
       border-top: 1px solid var(--border);
     }
 
-    /* Estilos da Simulação (Página 2) */
+    /* Linhas de Simulação (Página 2) */
     .sim-row {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       background: #f8fafc;
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 18px;
+      padding: 16px 20px;
       margin-bottom: 16px;
     }
 
     .sim-controls {
       display: flex;
       align-items: flex-start;
-      gap: 16px;
+      gap: 14px;
       flex-wrap: wrap;
     }
 
@@ -172,6 +166,7 @@
       display: flex;
       flex-direction: column;
       width: 170px;
+      flex-shrink: 0;
     }
 
     .input-wrapper input {
@@ -181,6 +176,7 @@
       border-radius: 8px;
       font-size: 1.05rem;
       outline: none;
+      background: #ffffff;
       transition: border-color 0.2s;
     }
 
@@ -195,54 +191,62 @@
       margin-top: 4px;
     }
 
+    /* Correção do encavalamento */
     .sim-result {
       flex: 1;
-      display: flex;
-      align-items: center;
-      min-height: 44px;
-      font-weight: 500;
+      min-width: 280px;
+      display: block; /* Garante o fluxo de texto contínuo em parágrafo */
+      line-height: 1.5;
       color: #0f172a;
       background: #ffffff;
       border: 1px dashed #cbd5e1;
-      padding: 10px 14px;
+      padding: 10px 16px;
       border-radius: 8px;
       font-size: 0.95rem;
+      min-height: 44px;
+    }
+
+    .sim-result strong {
+      color: #1d4ed8;
+      white-space: nowrap;
     }
 
     .sim-result.empty {
       color: var(--text-muted);
       font-style: italic;
+      line-height: 24px;
     }
 
     .bar-container {
       width: 100%;
-      height: 10px;
+      height: 12px;
       background-color: #fca5a5;
-      border-radius: 5px;
+      border-radius: 6px;
       overflow: hidden;
       display: none;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .bar-heads {
       height: 100%;
-      background-color: #60a5fa;
+      background-color: #3b82f6;
       width: 50%;
       transition: width 0.4s ease;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 650px) {
       .container {
-        padding: 24px 16px;
+        padding: 20px 14px;
       }
       .input-wrapper {
         width: 100%;
       }
-      .sim-controls {
-        flex-direction: column;
-      }
       .btn {
         width: 100%;
+      }
+      .sim-result {
+        width: 100%;
+        min-width: 100%;
       }
       .nav-actions {
         flex-direction: column;
@@ -269,7 +273,7 @@
 
       <div class="highlight-card">
         <p>Existem na literatura diferentes interpretações:</p>
-        <ul>
+        <ul style="margin-top: 8px;">
           <li style="margin-left: 20px; margin-bottom: 8px;">
             <strong>Como frequência:</strong> a proporção dos diferentes resultados observados no longo prazo.
           </li>
@@ -318,8 +322,9 @@
 
       <!-- 5 Caixas de Simulação -->
       <div id="simulators-container">
+        
         <!-- Linha 1 -->
-        <div class="sim-row" id="row-1">
+        <div class="sim-row">
           <div class="sim-controls">
             <div class="input-wrapper">
               <input type="number" id="input-1" min="1" max="1000000" placeholder="Ex: 10">
@@ -334,7 +339,7 @@
         </div>
 
         <!-- Linha 2 -->
-        <div class="sim-row" id="row-2">
+        <div class="sim-row">
           <div class="sim-controls">
             <div class="input-wrapper">
               <input type="number" id="input-2" min="1" max="1000000" placeholder="Ex: 100">
@@ -349,7 +354,7 @@
         </div>
 
         <!-- Linha 3 -->
-        <div class="sim-row" id="row-3">
+        <div class="sim-row">
           <div class="sim-controls">
             <div class="input-wrapper">
               <input type="number" id="input-3" min="1" max="1000000" placeholder="Ex: 1000">
@@ -364,7 +369,7 @@
         </div>
 
         <!-- Linha 4 -->
-        <div class="sim-row" id="row-4">
+        <div class="sim-row">
           <div class="sim-controls">
             <div class="input-wrapper">
               <input type="number" id="input-4" min="1" max="1000000" placeholder="Ex: 10000">
@@ -379,7 +384,7 @@
         </div>
 
         <!-- Linha 5 -->
-        <div class="sim-row" id="row-5">
+        <div class="sim-row">
           <div class="sim-controls">
             <div class="input-wrapper">
               <input type="number" id="input-5" min="1" max="1000000" placeholder="Ex: 100000">
@@ -392,6 +397,7 @@
             <div class="bar-heads" id="bar-5"></div>
           </div>
         </div>
+
       </div>
 
       <!-- Ações de Rodapé -->
@@ -404,7 +410,6 @@
   </main>
 
   <script>
-    // Navegação entre páginas
     function goToPage(pageNumber) {
       document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       const targetPage = document.getElementById(`page-${pageNumber}`);
@@ -414,7 +419,6 @@
       }
     }
 
-    // Execução da simulação
     function runSimulation(index) {
       const input = document.getElementById(`input-${index}`);
       const resultBox = document.getElementById(`result-${index}`);
@@ -423,7 +427,6 @@
 
       let tosses = parseInt(input.value, 10);
 
-      // Validação
       if (isNaN(tosses) || tosses <= 0) {
         alert("Por favor, digite um número inteiro maior que 0.");
         return;
@@ -435,7 +438,7 @@
         input.value = 1000000;
       }
 
-      // Sorteios em JavaScript: 0 = Coroa, 1 = Cara
+      // Sorteio
       let caras = 0;
       for (let i = 0; i < tosses; i++) {
         if (Math.random() < 0.5) {
@@ -447,18 +450,17 @@
       const percCaras = ((caras / tosses) * 100).toFixed(2).replace('.', ',');
       const percCoroas = ((coroas / tosses) * 100).toFixed(2).replace('.', ',');
 
-      // Exibição da mensagem solicitada
+      // Inserção do texto formatado
       resultBox.classList.remove('empty');
       resultBox.innerHTML = `Após lançar a moeda <strong>${tosses.toLocaleString('pt-BR')}</strong> vezes, obteve-se <strong>${percCaras}%</strong> de caras e <strong>${percCoroas}%</strong> de coroas.`;
 
-      // Barra visual de proporção (Azul = Caras, Vermelho = Coroas)
+      // Barra visual
       const percCarasNum = (caras / tosses) * 100;
       barWrap.style.display = 'block';
       bar.style.width = `${percCarasNum}%`;
       bar.title = `Caras: ${percCaras}% | Coroas: ${percCoroas}%`;
     }
 
-    // Limpar todos os valores e resultados
     function clearAll() {
       for (let i = 1; i <= 5; i++) {
         const input = document.getElementById(`input-${i}`);
