@@ -1,482 +1,625 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Interpretações da Probabilidade & Lei dos Grandes Números</title>
-  <style>
-    :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --accent: #0284c7;
-      --danger: #ef4444;
-      --danger-hover: #dc2626;
-      --success: #16a34a;
-    }
+  <!-- Carregando Tailwind CSS para layout responsivo e utilitários -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Fonte Inter para excelente legibilidade matemática e educacional -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-    * {
+  <style>
+    /* Configurações globais e garantia de box-sizing estrito */
+    *, *::before, *::after {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
-      background-color: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 16px;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 900px;
-      background: var(--card-bg);
-      border-radius: 16px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-      border: 1px solid var(--border);
-      padding: 36px 32px;
-    }
-
-    .page {
-      display: none;
-    }
-
-    .page.active {
-      display: block;
-      animation: fadeIn 0.3s ease-in-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    h1 {
-      font-size: 1.85rem;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8fafc;
       color: #0f172a;
-      margin-bottom: 24px;
-      text-align: center;
-      line-height: 1.3;
+      overflow-x: hidden;
     }
 
-    p {
-      margin-bottom: 16px;
-      font-size: 1.05rem;
-      color: #334155;
+    /* Transição suave entre páginas */
+    .page-view {
+      animation: fadeInPage 0.22s ease-out;
     }
 
-    .highlight-card {
-      background: #eff6ff;
-      border-left: 4px solid var(--primary);
-      padding: 18px 20px;
-      border-radius: 8px;
-      margin: 20px 0;
+    @keyframes fadeInPage {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .formula-badge {
-      display: inline-block;
-      background: #e2e8f0;
-      padding: 4px 12px;
-      border-radius: 6px;
-      font-weight: 600;
-      font-family: monospace;
-      font-size: 1rem;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 22px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      height: 44px;
-      white-space: nowrap;
-      transition: background 0.2s, transform 0.1s;
-    }
-
-    .btn:hover {
-      background-color: var(--primary-hover);
-    }
-
-    .btn:active {
-      transform: scale(0.98);
-    }
-
-    .btn-secondary {
-      background-color: #64748b;
-    }
-
-    .btn-secondary:hover {
-      background-color: #475569;
-    }
-
-    .btn-danger {
-      background-color: var(--danger);
-    }
-
-    .btn-danger:hover {
-      background-color: var(--danger-hover);
-    }
-
-    .nav-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 32px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border);
-    }
-
-    /* Linhas de Simulação (Página 2) */
-    .sim-row {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 20px;
-      margin-bottom: 16px;
-    }
-
-    .sim-controls {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .input-wrapper {
-      display: flex;
-      flex-direction: column;
-      width: 170px;
-      flex-shrink: 0;
-    }
-
-    .input-wrapper input {
-      height: 44px;
-      padding: 8px 12px;
-      border: 1.5px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 1.05rem;
-      outline: none;
-      background: #ffffff;
-      transition: border-color 0.2s;
-    }
-
-    .input-wrapper input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-    }
-
-    .input-label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    /* Correção do encavalamento */
-    .sim-result {
-      flex: 1;
-      min-width: 280px;
-      display: block; /* Garante o fluxo de texto contínuo em parágrafo */
-      line-height: 1.5;
-      color: #0f172a;
-      background: #ffffff;
-      border: 1px dashed #cbd5e1;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      min-height: 44px;
-    }
-
-    .sim-result strong {
-      color: #1d4ed8;
-      white-space: nowrap;
-    }
-
-    .sim-result.empty {
-      color: var(--text-muted);
-      font-style: italic;
-      line-height: 24px;
-    }
-
-    .bar-container {
-      width: 100%;
-      height: 12px;
-      background-color: #fca5a5;
-      border-radius: 6px;
-      overflow: hidden;
-      display: none;
-      margin-top: 2px;
-    }
-
+    /* Barra proporcional de caras e coroas na simulação */
     .bar-heads {
-      height: 100%;
-      background-color: #3b82f6;
-      width: 50%;
-      transition: width 0.4s ease;
-    }
-
-    @media (max-width: 650px) {
-      .container {
-        padding: 20px 14px;
-      }
-      .input-wrapper {
-        width: 100%;
-      }
-      .btn {
-        width: 100%;
-      }
-      .sim-result {
-        width: 100%;
-        min-width: 100%;
-      }
-      .nav-actions {
-        flex-direction: column;
-      }
+      transition: width 0.4s ease-out;
+      will-change: width;
     }
   </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col py-6 px-4 sm:px-6 lg:px-8">
 
-  <main class="container">
-    
-    <!-- PÁGINA 1: CONCEITO E INTERPRETAÇÕES -->
-    <section id="page-1" class="page active">
-      <h1>As Faces da Probabilidade</h1>
-
-      <p>
-        Existe o conceito matemático formal: 
-        <span class="formula-badge">casos desejados ÷ casos possíveis</span>.
-      </p>
-
-      <p>
-        Mas também existe a <strong>interpretação desse conceito</strong>, ou seja, como podemos pensar a respeito desse cálculo no mundo real.
-      </p>
-
-      <div class="highlight-card">
-        <p>Existem na literatura diferentes interpretações:</p>
-        <ul style="margin-top: 8px;">
-          <li style="margin-left: 20px; margin-bottom: 8px;">
-            <strong>Como frequência:</strong> a proporção dos diferentes resultados observados no longo prazo.
-          </li>
-          <li style="margin-left: 20px; margin-bottom: 8px;">
-            <strong>Como intensidade de crença:</strong> o grau de confiança racional que atribuímos aos diferentes resultados.
-          </li>
-          <li style="margin-left: 20px; margin-bottom: 8px;">
-            <strong>Como tendência da física (propensão):</strong> a intensidade das forças e disposições físicas materiais que levam aos diferentes resultados.
-          </li>
-        </ul>
+  <!-- ===================================================================== -->
+  <!-- PÁGINA 1: O CÁLCULO MATEMÁTICO DA PROBABILIDADE                       -->
+  <!-- ===================================================================== -->
+  <main id="page-1" class="page-view max-w-4xl w-full mx-auto flex-1 flex flex-col justify-center gap-6">
+    <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 sm:p-12 md:p-14">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-semibold mb-6">
+        <span>Página 1 de 5</span>
+        <span class="text-blue-300">•</span>
+        <span>Conceito Formal</span>
       </div>
 
-      <p>
-        <strong>Todas essas visões são diferentes aspectos da mesma coisa.</strong>
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-6">
+        O Cálculo Matemático da Probabilidade
+      </h1>
+
+      <p class="text-lg sm:text-xl text-slate-700 font-medium leading-relaxed mb-6">
+        Na matemática, a probabilidade possui uma definição formal direta para medir a chance de um evento ocorrer:
       </p>
 
-      <p>
-        <em>Por exemplo:</em> a tendência da física que faz com que lançamentos de moedas dêem igualmente cara ou coroa, é o que faz com que a gente tenha a mesma intensidade de crença tanto na cara quanto na coroa, e é também o que faz com que o resultado cara e coroa apareçam com uma mesma frequência no longo prazo.
-      </p>
-
-      <div class="highlight-card" style="border-left-color: var(--accent); background: #f0fdf4;">
-        <p style="margin: 0;">
-          A visão da probabilidade como frequência se baseia na <strong>Lei dos Grandes Números</strong>, que diz que: 
-          <em>quanto mais vezes você repete um experimento aleatório, mais a frequência observada se aproxima da frequência teórica</em>.
-        </p>
-      </div>
-
-      <p>Na próxima página faremos uma demonstração da Lei dos Grandes Números.</p>
-
-      <div class="nav-actions">
-        <button class="btn" onclick="goToPage(2)">Avançar para a Demonstração &rarr;</button>
+      <div class="bg-blue-50/80 border border-blue-200 rounded-2xl p-6 sm:p-8 text-center">
+        <span class="inline-block font-mono text-xl sm:text-2xl md:text-3xl font-extrabold text-blue-800 tracking-tight">
+          casos desejados ÷ casos possíveis
+        </span>
       </div>
     </section>
 
-    <!-- PÁGINA 2: SIMULAÇÃO PRÁTICA -->
-    <section id="page-2" class="page">
-      <h1>Demonstração da Lei dos Grandes Números</h1>
+    <footer class="flex justify-end">
+      <a
+        href="#pagina-2"
+        data-goto="2"
+        class="nav-link inline-flex items-center justify-center gap-3 px-7 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-base sm:text-lg shadow-sm hover:shadow transition-all"
+      >
+        <span>Próxima página: Interpretações do cálculo</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+        </svg>
+      </a>
+    </footer>
+  </main>
 
-      <p>
+  <!-- ===================================================================== -->
+  <!-- PÁGINA 2: AS POSSÍVEIS INTERPRETAÇÕES DO CÁLCULO MATEMÁTICO           -->
+  <!-- ===================================================================== -->
+  <main id="page-2" class="page-view hidden max-w-4xl w-full mx-auto flex-1 flex flex-col justify-center gap-6">
+    <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 sm:p-12 md:p-14">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-semibold mb-6">
+        <span>Página 2 de 5</span>
+        <span class="text-blue-300">•</span>
+        <span>Interpretações</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-6">
+        As Interpretações da Probabilidade
+      </h1>
+
+      <p class="text-lg sm:text-xl text-slate-700 font-medium leading-relaxed mb-6">
+        Além da fórmula matemática, existe a <strong class="text-slate-900 font-bold">interpretação desse conceito</strong>, ou seja, como podemos pensar a respeito desse cálculo no mundo real.
+      </p>
+
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8">
+        <p class="text-base sm:text-lg font-bold text-slate-800 mb-4">
+          Existem na literatura diferentes interpretações:
+        </p>
+        <ul class="space-y-4 text-base sm:text-lg text-slate-700 leading-relaxed">
+          <li class="flex items-start gap-3">
+            <span class="mt-1.5 w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0"></span>
+            <span>
+              <strong class="text-blue-800 font-bold">Como frequência:</strong> a proporção dos diferentes resultados observados no longo prazo.
+            </span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="mt-1.5 w-2.5 h-2.5 rounded-full bg-indigo-600 shrink-0"></span>
+            <span>
+              <strong class="text-indigo-800 font-bold">Como intensidade de crença:</strong> o grau de confiança racional que atribuímos aos diferentes resultados.
+            </span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="mt-1.5 w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0"></span>
+            <span>
+              <strong class="text-emerald-800 font-bold">Como tendência da física (propensão):</strong> a intensidade das forças e disposições físicas materiais que levam aos diferentes resultados.
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <footer class="flex justify-end">
+      <a
+        href="#pagina-3"
+        data-goto="3"
+        class="nav-link inline-flex items-center justify-center gap-3 px-7 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-base sm:text-lg shadow-sm hover:shadow transition-all"
+      >
+        <span>Próxima página: Diferentes faces da mesma coisa</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+        </svg>
+      </a>
+    </footer>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- PÁGINA 3: DIFERENTES FACES DA MESMA COISA                             -->
+  <!-- ===================================================================== -->
+  <main id="page-3" class="page-view hidden max-w-4xl w-full mx-auto flex-1 flex flex-col justify-center gap-6">
+    <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 sm:p-12 md:p-14">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm font-semibold mb-6">
+        <span>Página 3 de 5</span>
+        <span class="text-indigo-300">•</span>
+        <span>Unidade das Interpretações</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-6">
+        Diferentes Faces da Mesma Coisa
+      </h1>
+
+      <p class="text-lg sm:text-xl text-slate-900 font-bold leading-relaxed mb-6">
+        Todas essas visões são diferentes aspectos da mesma coisa.
+      </p>
+
+      <div class="bg-indigo-50/60 border border-indigo-100 rounded-2xl p-6 sm:p-8">
+        <p class="text-base sm:text-lg text-slate-700 leading-relaxed">
+          <em class="font-semibold text-indigo-900 not-italic">Por exemplo:</em> a tendência da física que faz com que lançamentos de moedas dêem igualmente cara ou coroa, é o que faz com que a gente tenha a mesma intensidade de crença tanto na cara quanto na coroa, e é também o que faz com que o resultado cara e coroa apareçam com uma mesma frequência no longo prazo.
+        </p>
+      </div>
+    </section>
+
+    <footer class="flex justify-end">
+      <a
+        href="#pagina-4"
+        data-goto="4"
+        class="nav-link inline-flex items-center justify-center gap-3 px-7 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-base sm:text-lg shadow-sm hover:shadow transition-all"
+      >
+        <span>Próxima página: A Lei dos Grandes Números</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+        </svg>
+      </a>
+    </footer>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- PÁGINA 4: A FREQUÊNCIA E A LEI DOS GRANDES NÚMEROS                    -->
+  <!-- ===================================================================== -->
+  <main id="page-4" class="page-view hidden max-w-4xl w-full mx-auto flex-1 flex flex-col justify-center gap-6">
+    <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 sm:p-12 md:p-14">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm font-semibold mb-6">
+        <span>Página 4 de 5</span>
+        <span class="text-emerald-300">•</span>
+        <span>Fundamento</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-6">
+        A Frequência e a Lei dos Grandes Números
+      </h1>
+
+      <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-6 sm:p-8 mb-6">
+        <p class="text-lg sm:text-xl text-slate-800 leading-relaxed">
+          A visão da probabilidade como frequência se baseia na <strong class="text-emerald-800 font-extrabold">Lei dos Grandes Números</strong>, que diz que:
+          <em class="text-slate-900 font-medium">quanto mais vezes você repete um experimento aleatório, mais a frequência observada se aproxima da frequência teórica</em>.
+        </p>
+      </div>
+
+      <p class="text-base sm:text-lg text-slate-700 font-medium">
+        Na próxima página faremos uma demonstração prática da Lei dos Grandes Números.
+      </p>
+    </section>
+
+    <footer class="flex justify-end">
+      <a
+        href="#pagina-5"
+        data-goto="5"
+        class="nav-link inline-flex items-center justify-center gap-3 px-7 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-base sm:text-lg shadow-sm hover:shadow transition-all"
+      >
+        <span>Avançar para a Demonstração</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+        </svg>
+      </a>
+    </footer>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- PÁGINA 5: SIMULAÇÃO DA LEI DOS GRANDES NÚMEROS                        -->
+  <!-- ===================================================================== -->
+  <main id="page-5" class="page-view hidden max-w-5xl w-full mx-auto flex-1 flex flex-col gap-6">
+    <!-- Cabeçalho da Simulação -->
+    <header class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider">
+          Página 5 de 5 • Simulação
+        </span>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
+        Demonstração da Lei dos Grandes Números
+      </h1>
+      <p class="text-base sm:text-lg text-slate-700 font-medium leading-relaxed mb-2">
         Suponha que você vai jogar uma moeda um determinado número de vezes. Se a lei dos grandes números estiver correta, quanto mais vezes você jogar, maior vai ser a tendência de que o número de caras e coroas seja igual a 50%.
       </p>
-
-      <p>
+      <p class="text-base text-slate-600">
         Defina abaixo o número de vezes que você quer lançar a moeda e veja as porcentagens de cara e coroa.
       </p>
+    </header>
 
-      <!-- 5 Caixas de Simulação -->
-      <div id="simulators-container">
-        
+    <!-- Área das 5 Simulações -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 flex-1 flex flex-col justify-between gap-4">
+      <!-- Aviso de validação inline (substituindo alert nativo) -->
+      <div id="sim-notice" class="hidden rounded-xl px-4 py-3 text-sm font-semibold border bg-amber-50 border-amber-200 text-amber-900"></div>
+
+      <div id="simulators-container" class="flex flex-col gap-4">
         <!-- Linha 1 -->
-        <div class="sim-row">
-          <div class="sim-controls">
-            <div class="input-wrapper">
-              <input type="number" id="input-1" min="1" max="1000000" placeholder="Ex: 10">
-              <span class="input-label">número de lançamentos</span>
+        <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col gap-3">
+          <div class="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+            <div class="w-full sm:w-44 shrink-0">
+              <input
+                type="number"
+                id="input-1"
+                min="1"
+                max="1000000"
+                placeholder="Ex: 10"
+                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-semibold focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-all"
+              />
+              <span class="block text-xs text-slate-500 mt-1">número de lançamentos</span>
             </div>
-            <button class="btn" onclick="runSimulation(1)">Jogar</button>
-            <div class="sim-result empty" id="result-1">O resultado aparecerá aqui após o lançamento.</div>
+            <button
+              type="button"
+              data-sim="1"
+              class="sim-btn h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm sm:text-base shadow-sm transition-all shrink-0 cursor-pointer"
+            >
+              Jogar
+            </button>
+            <div
+              id="result-1"
+              class="flex-1 min-h-[44px] bg-white border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-sm sm:text-base text-slate-400 italic leading-relaxed"
+            >
+              O resultado aparecerá aqui após o lançamento.
+            </div>
           </div>
-          <div class="bar-container" id="bar-wrap-1">
-            <div class="bar-heads" id="bar-1"></div>
+          <div id="bar-wrap-1" class="hidden w-full h-3 bg-rose-300 rounded-full overflow-hidden">
+            <div id="bar-1" class="bar-heads h-full bg-blue-600" style="width: 50%;"></div>
           </div>
         </div>
 
         <!-- Linha 2 -->
-        <div class="sim-row">
-          <div class="sim-controls">
-            <div class="input-wrapper">
-              <input type="number" id="input-2" min="1" max="1000000" placeholder="Ex: 100">
-              <span class="input-label">número de lançamentos</span>
+        <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col gap-3">
+          <div class="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+            <div class="w-full sm:w-44 shrink-0">
+              <input
+                type="number"
+                id="input-2"
+                min="1"
+                max="1000000"
+                placeholder="Ex: 100"
+                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-semibold focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-all"
+              />
+              <span class="block text-xs text-slate-500 mt-1">número de lançamentos</span>
             </div>
-            <button class="btn" onclick="runSimulation(2)">Jogar</button>
-            <div class="sim-result empty" id="result-2">O resultado aparecerá aqui após o lançamento.</div>
+            <button
+              type="button"
+              data-sim="2"
+              class="sim-btn h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm sm:text-base shadow-sm transition-all shrink-0 cursor-pointer"
+            >
+              Jogar
+            </button>
+            <div
+              id="result-2"
+              class="flex-1 min-h-[44px] bg-white border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-sm sm:text-base text-slate-400 italic leading-relaxed"
+            >
+              O resultado aparecerá aqui após o lançamento.
+            </div>
           </div>
-          <div class="bar-container" id="bar-wrap-2">
-            <div class="bar-heads" id="bar-2"></div>
+          <div id="bar-wrap-2" class="hidden w-full h-3 bg-rose-300 rounded-full overflow-hidden">
+            <div id="bar-2" class="bar-heads h-full bg-blue-600" style="width: 50%;"></div>
           </div>
         </div>
 
         <!-- Linha 3 -->
-        <div class="sim-row">
-          <div class="sim-controls">
-            <div class="input-wrapper">
-              <input type="number" id="input-3" min="1" max="1000000" placeholder="Ex: 1000">
-              <span class="input-label">número de lançamentos</span>
+        <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col gap-3">
+          <div class="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+            <div class="w-full sm:w-44 shrink-0">
+              <input
+                type="number"
+                id="input-3"
+                min="1"
+                max="1000000"
+                placeholder="Ex: 1000"
+                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-semibold focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-all"
+              />
+              <span class="block text-xs text-slate-500 mt-1">número de lançamentos</span>
             </div>
-            <button class="btn" onclick="runSimulation(3)">Jogar</button>
-            <div class="sim-result empty" id="result-3">O resultado aparecerá aqui após o lançamento.</div>
+            <button
+              type="button"
+              data-sim="3"
+              class="sim-btn h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm sm:text-base shadow-sm transition-all shrink-0 cursor-pointer"
+            >
+              Jogar
+            </button>
+            <div
+              id="result-3"
+              class="flex-1 min-h-[44px] bg-white border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-sm sm:text-base text-slate-400 italic leading-relaxed"
+            >
+              O resultado aparecerá aqui após o lançamento.
+            </div>
           </div>
-          <div class="bar-container" id="bar-wrap-3">
-            <div class="bar-heads" id="bar-3"></div>
+          <div id="bar-wrap-3" class="hidden w-full h-3 bg-rose-300 rounded-full overflow-hidden">
+            <div id="bar-3" class="bar-heads h-full bg-blue-600" style="width: 50%;"></div>
           </div>
         </div>
 
         <!-- Linha 4 -->
-        <div class="sim-row">
-          <div class="sim-controls">
-            <div class="input-wrapper">
-              <input type="number" id="input-4" min="1" max="1000000" placeholder="Ex: 10000">
-              <span class="input-label">número de lançamentos</span>
+        <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col gap-3">
+          <div class="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+            <div class="w-full sm:w-44 shrink-0">
+              <input
+                type="number"
+                id="input-4"
+                min="1"
+                max="1000000"
+                placeholder="Ex: 10000"
+                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-semibold focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-all"
+              />
+              <span class="block text-xs text-slate-500 mt-1">número de lançamentos</span>
             </div>
-            <button class="btn" onclick="runSimulation(4)">Jogar</button>
-            <div class="sim-result empty" id="result-4">O resultado aparecerá aqui após o lançamento.</div>
+            <button
+              type="button"
+              data-sim="4"
+              class="sim-btn h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm sm:text-base shadow-sm transition-all shrink-0 cursor-pointer"
+            >
+              Jogar
+            </button>
+            <div
+              id="result-4"
+              class="flex-1 min-h-[44px] bg-white border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-sm sm:text-base text-slate-400 italic leading-relaxed"
+            >
+              O resultado aparecerá aqui após o lançamento.
+            </div>
           </div>
-          <div class="bar-container" id="bar-wrap-4">
-            <div class="bar-heads" id="bar-4"></div>
+          <div id="bar-wrap-4" class="hidden w-full h-3 bg-rose-300 rounded-full overflow-hidden">
+            <div id="bar-4" class="bar-heads h-full bg-blue-600" style="width: 50%;"></div>
           </div>
         </div>
 
         <!-- Linha 5 -->
-        <div class="sim-row">
-          <div class="sim-controls">
-            <div class="input-wrapper">
-              <input type="number" id="input-5" min="1" max="1000000" placeholder="Ex: 100000">
-              <span class="input-label">número de lançamentos</span>
+        <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col gap-3">
+          <div class="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+            <div class="w-full sm:w-44 shrink-0">
+              <input
+                type="number"
+                id="input-5"
+                min="1"
+                max="1000000"
+                placeholder="Ex: 100000"
+                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-semibold focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-all"
+              />
+              <span class="block text-xs text-slate-500 mt-1">número de lançamentos</span>
             </div>
-            <button class="btn" onclick="runSimulation(5)">Jogar</button>
-            <div class="sim-result empty" id="result-5">O resultado aparecerá aqui após o lançamento.</div>
+            <button
+              type="button"
+              data-sim="5"
+              class="sim-btn h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm sm:text-base shadow-sm transition-all shrink-0 cursor-pointer"
+            >
+              Jogar
+            </button>
+            <div
+              id="result-5"
+              class="flex-1 min-h-[44px] bg-white border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-sm sm:text-base text-slate-400 italic leading-relaxed"
+            >
+              O resultado aparecerá aqui após o lançamento.
+            </div>
           </div>
-          <div class="bar-container" id="bar-wrap-5">
-            <div class="bar-heads" id="bar-5"></div>
+          <div id="bar-wrap-5" class="hidden w-full h-3 bg-rose-300 rounded-full overflow-hidden">
+            <div id="bar-5" class="bar-heads h-full bg-blue-600" style="width: 50%;"></div>
           </div>
         </div>
-
       </div>
 
-      <!-- Ações de Rodapé -->
-      <div class="nav-actions" style="justify-content: space-between;">
-        <button class="btn btn-secondary" onclick="goToPage(1)">&larr; Voltar para a página inicial</button>
-        <button class="btn btn-danger" onclick="clearAll()">Limpar os valores</button>
+      <!-- Botão Limpar os valores dentro da caixa da simulação -->
+      <div class="pt-3 border-t border-slate-200 flex justify-end">
+        <button
+          id="clear-btn"
+          type="button"
+          class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-bold text-sm sm:text-base shadow-sm transition-all cursor-pointer"
+        >
+          Limpar os valores
+        </button>
       </div>
     </section>
 
+    <!-- Link de volta ao início fora da caixa principal -->
+    <footer class="flex justify-end">
+      <a
+        href="#pagina-1"
+        data-goto="1"
+        class="nav-link inline-flex items-center justify-center gap-3 px-7 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-base sm:text-lg shadow-sm hover:shadow transition-all"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd" />
+        </svg>
+        <span>Voltar ao início</span>
+      </a>
+    </footer>
   </main>
 
   <script>
-    function goToPage(pageNumber) {
-      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-      const targetPage = document.getElementById(`page-${pageNumber}`);
-      if (targetPage) {
-        targetPage.classList.add('active');
+    /**
+     * Aplicação Educacional em 5 Páginas:
+     * 1) O Cálculo Matemático da Probabilidade
+     * 2) As Interpretações da Probabilidade
+     * 3) Diferentes Faces da Mesma Coisa
+     * 4) A Frequência e a Lei dos Grandes Números
+     * 5) Demonstração da Lei dos Grandes Números (Simulador)
+     */
+    (function () {
+      const pages = {
+        '1': document.getElementById('page-1'),
+        '2': document.getElementById('page-2'),
+        '3': document.getElementById('page-3'),
+        '4': document.getElementById('page-4'),
+        '5': document.getElementById('page-5')
+      };
+
+      const pageTitles = {
+        '1': 'O Cálculo Matemático da Probabilidade',
+        '2': 'As Interpretações da Probabilidade',
+        '3': 'Diferentes Faces da Mesma Coisa',
+        '4': 'A Frequência e a Lei dos Grandes Números',
+        '5': 'Demonstração da Lei dos Grandes Números'
+      };
+
+      const simNotice = document.getElementById('sim-notice');
+
+      function showNotice(message) {
+        simNotice.textContent = message;
+        simNotice.classList.remove('hidden');
+      }
+
+      function hideNotice() {
+        simNotice.classList.add('hidden');
+      }
+
+      /**
+       * Navegação entre as 5 páginas com suporte a histórico do navegador.
+       */
+      function navigateTo(pageId, updateHash = true) {
+        if (!pages[pageId]) pageId = '1';
+
+        Object.keys(pages).forEach((key) => {
+          if (key === pageId) {
+            pages[key].classList.remove('hidden');
+          } else {
+            pages[key].classList.add('hidden');
+          }
+        });
+
+        document.title = pageTitles[pageId];
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }
 
-    function runSimulation(index) {
-      const input = document.getElementById(`input-${index}`);
-      const resultBox = document.getElementById(`result-${index}`);
-      const barWrap = document.getElementById(`bar-wrap-${index}`);
-      const bar = document.getElementById(`bar-${index}`);
-
-      let tosses = parseInt(input.value, 10);
-
-      if (isNaN(tosses) || tosses <= 0) {
-        alert("Por favor, digite um número inteiro maior que 0.");
-        return;
-      }
-
-      if (tosses > 1000000) {
-        alert("O valor máximo permitido é de 1.000.000 de lançamentos.");
-        tosses = 1000000;
-        input.value = 1000000;
-      }
-
-      // Sorteio
-      let caras = 0;
-      for (let i = 0; i < tosses; i++) {
-        if (Math.random() < 0.5) {
-          caras++;
+        if (updateHash) {
+          try {
+            history.pushState({ page: pageId }, '', `#pagina-${pageId}`);
+          } catch (e) {
+            // Fallback silencioso caso o ambiente restrinja pushState
+          }
         }
       }
 
-      const coroas = tosses - caras;
-      const percCaras = ((caras / tosses) * 100).toFixed(2).replace('.', ',');
-      const percCoroas = ((coroas / tosses) * 100).toFixed(2).replace('.', ',');
+      /**
+       * Executa a simulação de lançamentos de moeda para a linha selecionada.
+       */
+      function runSimulation(index) {
+        const input = document.getElementById(`input-${index}`);
+        const resultBox = document.getElementById(`result-${index}`);
+        const barWrap = document.getElementById(`bar-wrap-${index}`);
+        const bar = document.getElementById(`bar-${index}`);
 
-      // Inserção do texto formatado
-      resultBox.classList.remove('empty');
-      resultBox.innerHTML = `Após lançar a moeda <strong>${tosses.toLocaleString('pt-BR')}</strong> vezes, obteve-se <strong>${percCaras}%</strong> de caras e <strong>${percCoroas}%</strong> de coroas.`;
+        let tosses = parseInt(input.value, 10);
 
-      // Barra visual
-      const percCarasNum = (caras / tosses) * 100;
-      barWrap.style.display = 'block';
-      bar.style.width = `${percCarasNum}%`;
-      bar.title = `Caras: ${percCaras}% | Coroas: ${percCoroas}%`;
-    }
+        if (isNaN(tosses) || tosses <= 0) {
+          showNotice('Por favor, digite um número inteiro maior que 0.');
+          input.focus();
+          return;
+        }
 
-    function clearAll() {
+        hideNotice();
+
+        if (tosses > 1000000) {
+          showNotice('O valor máximo permitido é de 1.000.000 de lançamentos (ajustado automaticamente).');
+          tosses = 1000000;
+          input.value = 1000000;
+        }
+
+        let caras = 0;
+        for (let i = 0; i < tosses; i++) {
+          if (Math.random() < 0.5) {
+            caras++;
+          }
+        }
+
+        const coroas = tosses - caras;
+        const percCaras = ((caras / tosses) * 100).toFixed(2).replace('.', ',');
+        const percCoroas = ((coroas / tosses) * 100).toFixed(2).replace('.', ',');
+
+        resultBox.className = 'flex-1 min-h-[44px] bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm sm:text-base text-slate-900 leading-relaxed';
+        resultBox.innerHTML = `Após lançar a moeda <strong class="text-blue-700 font-bold whitespace-nowrap">${tosses.toLocaleString('pt-BR')}</strong> vezes, obteve-se <strong class="text-blue-700 font-bold whitespace-nowrap">${percCaras}%</strong> de caras e <strong class="text-rose-600 font-bold whitespace-nowrap">${percCoroas}%</strong> de coroas.`;
+
+        const percCarasNum = (caras / tosses) * 100;
+        barWrap.classList.remove('hidden');
+        bar.style.width = `${percCarasNum}%`;
+        bar.title = `Caras: ${percCaras}% | Coroas: ${percCoroas}%`;
+      }
+
+      /**
+       * Limpa todos os campos e resultados da página de simulação.
+       */
+      function clearAll() {
+        hideNotice();
+        for (let i = 1; i <= 5; i++) {
+          const input = document.getElementById(`input-${i}`);
+          const resultBox = document.getElementById(`result-${i}`);
+          const barWrap = document.getElementById(`bar-wrap-${i}`);
+
+          if (input) input.value = '';
+          if (resultBox) {
+            resultBox.className = 'flex-1 min-h-[44px] bg-white border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-sm sm:text-base text-slate-400 italic leading-relaxed';
+            resultBox.textContent = 'O resultado aparecerá aqui após o lançamento.';
+          }
+          if (barWrap) {
+            barWrap.classList.add('hidden');
+          }
+        }
+      }
+
+      // Eventos de navegação entre páginas
+      document.querySelectorAll('.nav-link').forEach((link) => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetPage = link.getAttribute('data-goto');
+          if (targetPage) {
+            navigateTo(targetPage, true);
+          }
+        });
+      });
+
+      // Eventos dos botões de simulação (Jogar) e Enter nos campos numéricos
+      document.querySelectorAll('.sim-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const index = btn.getAttribute('data-sim');
+          runSimulation(index);
+        });
+      });
+
       for (let i = 1; i <= 5; i++) {
-        const input = document.getElementById(`input-${i}`);
-        const resultBox = document.getElementById(`result-${i}`);
-        const barWrap = document.getElementById(`bar-wrap-${i}`);
-        
-        if (input) input.value = '';
-        if (resultBox) {
-          resultBox.classList.add('empty');
-          resultBox.textContent = 'O resultado aparecerá aqui após o lançamento.';
-        }
-        if (barWrap) {
-          barWrap.style.display = 'none';
+        const inputEl = document.getElementById(`input-${i}`);
+        if (inputEl) {
+          inputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              runSimulation(i);
+            }
+          });
         }
       }
-    }
+
+      document.getElementById('clear-btn').addEventListener('click', clearAll);
+
+      window.addEventListener('popstate', () => {
+        const match = window.location.hash.match(/^#pagina-([1-5])$/);
+        navigateTo(match ? match[1] : '1', false);
+      });
+
+      const initialMatch = window.location.hash.match(/^#pagina-([1-5])$/);
+      navigateTo(initialMatch ? initialMatch[1] : '1', false);
+    })();
   </script>
 </body>
 </html>
